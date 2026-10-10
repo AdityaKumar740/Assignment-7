@@ -9,6 +9,7 @@ import {
   productsApiUrl,
   unitNames,
 } from "@/lib/products";
+import { getCategoriesForHeader } from "@/lib/server-products";
 
 export const dynamicParams = true;
 
@@ -18,7 +19,9 @@ export default async function ProductDetail({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const listResponse = await fetch(productsApiUrl);
+  const listResponse = await fetch(productsApiUrl, {
+    next: { revalidate: 300 },
+  });
   if (!listResponse.ok) {
     throw new Error(`Product list request failed (${listResponse.status})`);
   }
@@ -40,10 +43,12 @@ export default async function ProductDetail({
     redirect(`/signin?callbackURL=${callbackURL}&notice=protected-route`);
   }
 
-  const detailResponse = await fetch(
-    `${productsApiUrl}/${productSummary.id}`,
-    { cache: "no-store" },
-  );
+  const [detailResponse, headerCategories] = await Promise.all([
+    fetch(`${productsApiUrl}/${productSummary.id}`, {
+      next: { revalidate: 300 },
+    }),
+    getCategoriesForHeader(),
+  ]);
   if (!detailResponse.ok) {
     throw new Error(`Product detail request failed (${detailResponse.status})`);
   }
@@ -85,7 +90,11 @@ export default async function ProductDetail({
 
   return (
     <>
-      <SiteHeader products={listData} />
+      <SiteHeader
+        categories={headerCategories.categories}
+        categoryError={headerCategories.categoryError}
+        products={listData}
+      />
       <main className="mx-auto w-[min(100%-32px,900px)] pb-12 pt-5">
         <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-2 text-[11px] text-[#78837c]">
           <Link className="hover:text-[#078641]" href="/">হোম</Link>

@@ -48,5 +48,18 @@ heading to the bazar.
    - Google: `{BETTER_AUTH_URL}/api/auth/callback/google`
    - GitHub: `{BETTER_AUTH_URL}/api/auth/callback/github`
 
+## Deploying to Vercel
 
+1. Import the repository into Vercel and use the default Next.js build settings.
+2. Configure `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`, and `MONGODB_URL` in the
+   Vercel project's Environment Variables. Add the Google and GitHub OAuth
+   credentials when those providers are enabled.
+3. Set `BETTER_AUTH_URL` to the public origin for the deployment and register
+   its `/api/auth/callback/google` and `/api/auth/callback/github` URLs with
+   their respective OAuth providers.
+4. Redeploy after changing environment variables.
+
+The Better Auth route uses Vercel's Node.js runtime. Public product and
+category responses are cached and revalidated periodically; pages that depend
+on the signed-in user's session remain request-rendered.
 

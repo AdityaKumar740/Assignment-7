@@ -2,9 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { ProfileSettings } from "@/components/profile-settings";
 import { SiteHeader } from "@/components/site-header";
-import { getProductsForHeader } from "@/lib/server-products";
-
-export const dynamic = "force-dynamic";
+import { getHeaderData } from "@/lib/server-products";
 
 export default async function ProfilePage() {
   const { auth } = await import("@/lib/auth");
@@ -13,11 +11,11 @@ export default async function ProfilePage() {
     redirect("/signin?callbackURL=%2Fprofile&notice=protected-route");
   }
 
-  const { products, error } = await getProductsForHeader();
+  const headerData = await getHeaderData();
 
   return (
     <>
-      <SiteHeader products={products} error={error} />
+      <SiteHeader {...headerData} />
       <main className="min-h-[calc(100vh-150px)] bg-[#f1f6f2] px-4 pb-12 pt-20 max-[600px]:pt-12">
         <div className="mx-auto w-full max-w-[576px]">
           <header className="mb-5">

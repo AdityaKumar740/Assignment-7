@@ -1,5 +1,7 @@
 import { toNextJsHandler } from "better-auth/next-js";
 
+export const runtime = "nodejs";
+
 async function getAuthHandlers() {
   const { auth } = await import("@/lib/auth");
   return toNextJsHandler(auth);

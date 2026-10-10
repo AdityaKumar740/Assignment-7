@@ -2,9 +2,7 @@ import { Suspense } from "react";
 import { AuthForm, AuthPageSkeleton } from "@/components/auth-form";
 import { SiteHeader } from "@/components/site-header";
 import { githubOAuthEnabled, googleOAuthEnabled } from "@/lib/auth-options";
-import { getProductsForHeader } from "@/lib/server-products";
-
-export const dynamic = "force-dynamic";
+import { getHeaderData } from "@/lib/server-products";
 
 type SignInPageProps = {
   searchParams: Promise<{
@@ -32,14 +30,14 @@ function getSafeCallbackURL(callbackURL?: string) {
 }
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const [{ callbackURL, registered, notice }, { products, error }] = await Promise.all([
+  const [{ callbackURL, registered, notice }, headerData] = await Promise.all([
     searchParams,
-    getProductsForHeader(),
+    getHeaderData(),
   ]);
 
   return (
     <>
-      <SiteHeader products={products} error={error} />
+      <SiteHeader {...headerData} />
       <Suspense fallback={<AuthPageSkeleton mode="signin" />}>
         <AuthForm
           callbackURL={getSafeCallbackURL(callbackURL)}

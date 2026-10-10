@@ -7,6 +7,7 @@ import {
   isProductList,
   productsApiUrl,
 } from "@/lib/products";
+import { getCategoriesForHeader } from "@/lib/server-products";
 
 export const dynamicParams = true;
 
@@ -20,9 +21,10 @@ export default async function CategoryPage({
   const categoryUrl = `${bazardorApiUrl}/categories/${encodeURIComponent(slug)}`;
   const categoryProductsUrl = new URL(productsApiUrl);
   categoryProductsUrl.searchParams.set("category", slug);
-  const [categoryResponse, productsResponse] = await Promise.all([
-    fetch(categoryUrl, { cache: "no-store" }),
-    fetch(categoryProductsUrl, { cache: "no-store" }),
+  const [categoryResponse, productsResponse, headerCategories] = await Promise.all([
+    fetch(categoryUrl, { next: { revalidate: 3600 } }),
+    fetch(categoryProductsUrl, { next: { revalidate: 300 } }),
+    getCategoriesForHeader(),
   ]);
 
   if (categoryResponse.status === 404) {
@@ -52,7 +54,11 @@ export default async function CategoryPage({
 
   return (
     <>
-      <SiteHeader products={productsData} />
+      <SiteHeader
+        categories={headerCategories.categories}
+        categoryError={headerCategories.categoryError}
+        products={productsData}
+      />
       <main className="mx-auto w-[min(100%-32px,1080px)] pb-12 pt-5 sm:pt-7">
         <header className="mb-4 flex min-h-[100px] items-center gap-3 rounded-2xl border border-[#e5ebe6] bg-[#f4f8f4] p-4">
           <span aria-hidden="true" className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-white text-2xl shadow-sm">

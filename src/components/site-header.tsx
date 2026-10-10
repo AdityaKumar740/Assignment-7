@@ -8,9 +8,7 @@ import { useToast } from "@/components/toast-provider";
 import { authClient } from "@/lib/auth-client";
 import logoIcon from "@/assets/logo-icon.png";
 import {
-  categoriesApiUrl,
   formatBengaliNumber,
-  isCategoryList,
   unitNames,
   type Category,
   type Product,
@@ -183,53 +181,20 @@ function AccountMenu() {
 export function SiteHeader({
   products,
   error,
+  categories,
+  categoryError,
 }: {
   products: Product[];
   error?: string | null;
+  categories: Category[];
+  categoryError?: string | null;
 }) {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [categoryError, setCategoryError] = useState<string | null>(null);
   const pathname = usePathname();
   const date = new Intl.DateTimeFormat("bn-BD", {
     day: "numeric",
     month: "long",
     year: "numeric",
   }).format(new Date());
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    async function loadCategories() {
-      try {
-        const response = await fetch(categoriesApiUrl, {
-          signal: controller.signal,
-        });
-        if (!response.ok) {
-          throw new Error(`Category request failed (${response.status})`);
-        }
-
-        const data: unknown = await response.json();
-        if (!isCategoryList(data)) {
-          throw new Error("The category API returned an invalid response.");
-        }
-
-        setCategories(data);
-        setCategoryError(null);
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          return;
-        }
-        setCategoryError(
-          error instanceof Error
-            ? error.message
-            : "বিভাগের তথ্য লোড করা যায়নি।",
-        );
-      }
-    }
-
-    void loadCategories();
-    return () => controller.abort();
-  }, []);
 
   return (
     <header className="w-full bg-white">
