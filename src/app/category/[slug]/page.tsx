@@ -3,7 +3,6 @@ import { SiteHeader } from "@/components/site-header";
 import { CategoryProductList } from "@/components/category-product-list";
 import {
   bazardorApiUrl,
-  categories,
   isCategory,
   isProductList,
   productsApiUrl,
@@ -30,22 +29,13 @@ export default async function CategoryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const knownCategory = categories.find((category) => category.id === slug);
 
-  if (!knownCategory) {
-    return (
-      <>
-        <SiteHeader products={[]} />
-        <CategoryNotFound />
-      </>
-    );
-  }
-
+  const categoryUrl = `${bazardorApiUrl}/categories/${encodeURIComponent(slug)}`;
+  const categoryProductsUrl = new URL(productsApiUrl);
+  categoryProductsUrl.searchParams.set("category", slug);
   const [categoryResponse, productsResponse] = await Promise.all([
-    fetch(`${bazardorApiUrl}/categories/${encodeURIComponent(slug)}`, {
-      cache: "no-store",
-    }),
-    fetch(productsApiUrl, { cache: "no-store" }),
+    fetch(categoryUrl, { cache: "no-store" }),
+    fetch(categoryProductsUrl, { cache: "no-store" }),
   ]);
 
   if (categoryResponse.status === 404) {
@@ -57,9 +47,7 @@ export default async function CategoryPage({
     );
   }
   if (!categoryResponse.ok) {
-    throw new Error(
-      `Category request failed (${categoryResponse.status})`,
-    );
+    throw new Error(`Category request failed (${categoryResponse.status})`);
   }
   if (!productsResponse.ok) {
     throw new Error(
@@ -78,9 +66,7 @@ export default async function CategoryPage({
     throw new Error("The product API returned an invalid response.");
   }
 
-  const products = productsData.filter(
-    (product) => product.category === categoryData.slug,
-  );
+  const products = productsData.filter((product) => product.category === slug);
 
   return (
     <>

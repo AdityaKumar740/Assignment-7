@@ -8,9 +8,11 @@ import { useToast } from "@/components/toast-provider";
 import { authClient } from "@/lib/auth-client";
 import logoIcon from "@/assets/logo-icon.png";
 import {
-  categories,
+  categoriesApiUrl,
   formatBengaliNumber,
+  isCategoryList,
   unitNames,
+  type Category,
   type Product,
 } from "@/lib/products";
 
@@ -185,12 +187,49 @@ export function SiteHeader({
   products: Product[];
   error?: string | null;
 }) {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
   const pathname = usePathname();
   const date = new Intl.DateTimeFormat("bn-BD", {
     day: "numeric",
     month: "long",
     year: "numeric",
   }).format(new Date());
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadCategories() {
+      try {
+        const response = await fetch(categoriesApiUrl, {
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error(`Category request failed (${response.status})`);
+        }
+
+        const data: unknown = await response.json();
+        if (!isCategoryList(data)) {
+          throw new Error("The category API returned an invalid response.");
+        }
+
+        setCategories(data);
+        setCategoryError(null);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setCategoryError(
+          error instanceof Error
+            ? error.message
+            : "বিভাগের তথ্য লোড করা যায়নি।",
+        );
+      }
+    }
+
+    void loadCategories();
+    return () => controller.abort();
+  }, []);
 
   return (
     <header className="w-full bg-white">
@@ -212,19 +251,29 @@ export function SiteHeader({
 
       <nav className="border-y border-[#edf1ee] bg-[#fbfcfb]" aria-label="পণ্যের বিভাগ">
         <div className="mx-auto flex max-w-[1080px] justify-center gap-1 overflow-x-auto px-3 py-1.5 max-[600px]:justify-start">
-          {categories.map((category) => (
-            <Link
-              aria-current={
-                pathname === `/category/${category.id}` ? "page" : undefined
-              }
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition ${pathname === `/category/${category.id}` ? "bg-[#e8f3ea] text-[#08763a]" : "text-[#59665e] hover:bg-[#f0f5f1] hover:text-[#08763a]"}`}
-              key={category.id}
-              href={`/category/${category.id}`}
-            >
-              <span aria-hidden="true">{category.icon}</span>
-              <span>{category.name}</span>
-            </Link>
-          ))}
+          {categoryError ? (
+            <p className="m-0 py-2 text-xs text-[#a22d25]" role="alert">
+              বিভাগ লোড করা যায়নি: {categoryError}
+            </p>
+          ) : categories.length === 0 ? (
+            <p className="m-0 py-2 text-xs text-[#59665e]" role="status">
+              বিভাগ লোড হচ্ছে…
+            </p>
+          ) : (
+            categories.map((category) => (
+              <Link
+                aria-current={
+                  pathname === `/category/${category.id}` ? "page" : undefined
+                }
+                className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition ${pathname === `/category/${category.id}` ? "bg-[#e8f3ea] text-[#08763a]" : "text-[#59665e] hover:bg-[#f0f5f1] hover:text-[#08763a]"}`}
+                key={category.id}
+                href={`/category/${category.id}`}
+              >
+                <span aria-hidden="true">{category.icon}</span>
+                <span>{category.nameBn}</span>
+              </Link>
+            ))
+          )}
         </div>
       </nav>
 

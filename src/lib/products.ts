@@ -1,5 +1,7 @@
-export const bazardorApiUrl = "https://api.api-store.workers.dev/api/bazardor";
+export const bazardorApiUrl =
+  "https://openapi.programming-hero.com/api/bazardor";
 export const productsApiUrl = `${bazardorApiUrl}/products`;
+export const categoriesApiUrl = `${bazardorApiUrl}/categories`;
 
 export const unitNames: Record<string, string> = {
   kg: "কেজি",
@@ -7,17 +9,6 @@ export const unitNames: Record<string, string> = {
   dozen: "ডজন",
   piece: "পিস",
 };
-
-export const categories = [
-  { id: "chal", name: "চাল", icon: "🍚" },
-  { id: "dal", name: "ডাল", icon: "🫘" },
-  { id: "tel", name: "তেল", icon: "🛢️" },
-  { id: "sobji", name: "সবজি", icon: "🥬" },
-  { id: "mach", name: "মাছ", icon: "🐟" },
-  { id: "mangsho", name: "মাংস", icon: "🍗" },
-  { id: "dim-dui", name: "ডিম-দুধ", icon: "🥛" },
-  { id: "mosla", name: "মসলা", icon: "🌶️" },
-] as const;
 
 export type Category = {
   id: string;
@@ -54,6 +45,10 @@ export function isCategory(value: unknown): value is Category {
     typeof category.nameBn === "string" &&
     typeof category.icon === "string"
   );
+}
+
+export function isCategoryList(value: unknown): value is Category[] {
+  return Array.isArray(value) && value.every(isCategory);
 }
 
 export type MarketPrice = {

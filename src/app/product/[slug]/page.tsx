@@ -4,36 +4,11 @@ import { headers } from "next/headers";
 import { SiteHeader } from "@/components/site-header";
 import {
   formatBengaliNumber,
+  isProductDetails,
   isProductList,
   productsApiUrl,
-  type ProductDetails,
   unitNames,
 } from "@/lib/products";
-
-function isProductDetailsResponse(
-  value: unknown,
-): value is ProductDetails {
-  if (!isProductList([value])) {
-    return false;
-  }
-
-  const details = value as Record<string, unknown>;
-  return (
-    typeof details.yesterday === "number" &&
-    typeof details.lastWeek === "number" &&
-    typeof details.lastMonth === "number" &&
-    Array.isArray(details.markets) &&
-    details.markets.every(
-      (market: unknown) =>
-        market !== null &&
-        typeof market === "object" &&
-        typeof (market as Record<string, unknown>).market === "string" &&
-        typeof (market as Record<string, unknown>).division === "string" &&
-        typeof (market as Record<string, unknown>).min === "number" &&
-        typeof (market as Record<string, unknown>).max === "number",
-    )
-  );
-}
 
 export default async function ProductDetail({
   params,
@@ -64,19 +39,27 @@ export default async function ProductDetail({
 
   const detailResponse = await fetch(
     `${productsApiUrl}/${productSummary.id}`,
+    { cache: "no-store" },
   );
   if (!detailResponse.ok) {
     throw new Error(`Product detail request failed (${detailResponse.status})`);
   }
 
   const detailData: unknown = await detailResponse.json();
-  if (!isProductDetailsResponse(detailData)) {
+  if (!isProductDetails(detailData)) {
     throw new Error("The product detail API returned an invalid response.");
+  }
+  if (detailData.id !== productSummary.id) {
+    throw new Error("The product detail API returned a different product.");
   }
 
   const product = detailData;
   const unit = unitNames[product.unit] ?? product.unit;
-  const marketPrices = product.markets.flatMap((market) => [
+  const marketPriceRows = product.markets.map((market) => ({
+    ...market,
+    average: (market.min + market.max) / 2,
+  }));
+  const marketPrices = marketPriceRows.flatMap((market) => [
     market.min,
     market.max,
   ]);
@@ -86,9 +69,9 @@ export default async function ProductDetail({
   const maximum = marketPrices.length
     ? Math.max(...marketPrices)
     : product.today;
-  const average = marketPrices.length
-    ? marketPrices.reduce((total, price) => total + price, 0) /
-      marketPrices.length
+  const average = marketPriceRows.length
+    ? marketPriceRows.reduce((total, market) => total + market.average, 0) /
+      marketPriceRows.length
     : product.today;
   const changeLabel =
     product.change.dir === "up"
@@ -181,14 +164,14 @@ export default async function ProductDetail({
                   </tr>
                 </thead>
                 <tbody>
-                  {product.markets.map((market) => (
+                  {marketPriceRows.map((market) => (
                     <tr key={`${market.division}-${market.market}`}>
                       <td className="border-b border-[#edf1ee] px-3 py-3">{market.market}</td>
                       <td className="border-b border-[#edf1ee] px-3 py-3">{market.division}</td>
                       <td className="border-b border-[#edf1ee] px-3 py-3">{formatBengaliNumber(market.min)} টাকা</td>
                       <td className="border-b border-[#edf1ee] px-3 py-3">{formatBengaliNumber(market.max)} টাকা</td>
                       <td className="border-b border-[#edf1ee] px-3 py-3">
-                        {formatBengaliNumber((market.min + market.max) / 2)} টাকা
+                        {formatBengaliNumber(market.average)} টাকা
                       </td>
                     </tr>
                   ))}
