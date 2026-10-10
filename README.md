@@ -48,6 +48,31 @@ heading to the bazar.
    - Google: `{BETTER_AUTH_URL}/api/auth/callback/google`
    - GitHub: `{BETTER_AUTH_URL}/api/auth/callback/github`
 
+## Authentication
+
+Authentication uses Better Auth's server instance in `src/lib/auth.ts`, the
+MongoDB adapter, and the Next.js catch-all route at
+`/api/auth/[...all]`. The browser uses `createAuthClient` from
+`better-auth/react`; email/password and social sign-in requests go through
+that client. Profile and protected product pages verify the session on the
+server with `auth.api.getSession` and the incoming request headers.
+
+Provider credentials are optional, but each provider requires both its client
+ID and client secret. GitHub OAuth apps must also be configured to provide the
+user's email address. For Vercel, set `BETTER_AUTH_URL` to the canonical
+deployed origin, add all required secrets in the Vercel project settings, and
+redeploy after changing them. MongoDB access must be allowed from the
+deployment environment; the app uses Node.js for the Better Auth route.
+
+See the official Better Auth guides:
+
+- [Installation and configuration](https://www.better-auth.com/docs/installation)
+- [Next.js integration](https://www.better-auth.com/docs/integrations/next)
+- [MongoDB adapter](https://www.better-auth.com/docs/adapters/mongo)
+- [Email and password](https://www.better-auth.com/docs/authentication/email-password)
+- [Google provider](https://www.better-auth.com/docs/authentication/google)
+- [GitHub provider](https://www.better-auth.com/docs/authentication/github)
+
 ## Deploying to Vercel
 
 1. Import the repository into Vercel and use the default Next.js build settings.
@@ -62,4 +87,3 @@ heading to the bazar.
 The Better Auth route uses Vercel's Node.js runtime. Public product and
 category responses are cached and revalidated periodically; pages that depend
 on the signed-in user's session remain request-rendered.
-

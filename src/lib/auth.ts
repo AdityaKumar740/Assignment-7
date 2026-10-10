@@ -2,18 +2,10 @@ import "server-only";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { betterAuth } from "better-auth";
 import { MongoClient } from "mongodb";
-import { setServers } from "node:dns";
 import {
   githubCredentials,
   googleCredentials,
 } from "@/lib/auth-options";
-
-const mongoDnsServers = process.env.MONGODB_DNS_SERVERS?.split(",")
-  .map((server) => server.trim())
-  .filter(Boolean);
-if (mongoDnsServers?.length) {
-  setServers(mongoDnsServers);
-}
 
 const mongoUrl = process.env.MONGODB_URL;
 const authUrl = process.env.BETTER_AUTH_URL;
