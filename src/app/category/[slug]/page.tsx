@@ -11,13 +11,13 @@ import {
 
 function CategoryNotFound() {
   return (
-    <section className="category-empty-state">
-      <span aria-hidden="true" className="category-empty-icon">
+    <section className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-[#e5ebe6] bg-[#f7faf7] px-5 py-8 text-center">
+      <span aria-hidden="true" className="grid h-14 w-14 place-items-center rounded-2xl bg-[#e9f2ea] text-[26px]">
         🔎
       </span>
-      <h1>এই বিভাগটি পাওয়া যায়নি</h1>
-      <p>সঠিক বিভাগ নির্বাচন করে আবার চেষ্টা করুন।</p>
-      <Link className="hero-cta" href="/">
+      <h1 className="mb-0 mt-4 text-[22px] font-bold text-[#26332b]">এই বিভাগটি পাওয়া যায়নি</h1>
+      <p className="mb-4 mt-2 text-[13px] text-[#69756d]">সঠিক বিভাগ নির্বাচন করে আবার চেষ্টা করুন।</p>
+      <Link className="inline-flex min-h-10 items-center justify-center rounded-lg bg-[#078641] px-4 py-2 text-[13px] font-bold text-white hover:bg-[#066f36]" href="/">
         হোম পেজে ফিরে যান
       </Link>
     </section>
@@ -85,17 +85,17 @@ export default async function CategoryPage({
   return (
     <>
       <SiteHeader products={productsData} />
-      <main className="category-page">
-        <header className="category-page-heading">
-          <span aria-hidden="true" className="category-page-icon">
+      <main className="mx-auto w-[min(100%-32px,1080px)] pb-12 pt-5 sm:pt-7">
+        <header className="mb-4 flex min-h-[100px] items-center gap-3 rounded-2xl border border-[#e5ebe6] bg-[#f4f8f4] p-4">
+          <span aria-hidden="true" className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-white text-2xl shadow-sm">
             {categoryData.icon}
           </span>
           <div>
-            <h1>
+            <h1 className="m-0 text-[20px] font-bold text-[#29372e]">
               {categoryData.nameBn}
               <span> বাজারদর</span>
             </h1>
-            <p>
+            <p className="mb-0 mt-1 text-[11px] text-[#718078]">
               {new Intl.NumberFormat("bn-BD").format(products.length)}টি পণ্যের
               আজকের দাম ও পরিবর্তন
             </p>

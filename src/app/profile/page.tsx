@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { ProfileSettings } from "@/components/profile-settings";
 import { SiteHeader } from "@/components/site-header";
 import { getProductsForHeader } from "@/lib/server-products";
 
@@ -13,39 +14,25 @@ export default async function ProfilePage() {
   }
 
   const { products, error } = await getProductsForHeader();
-  const joinedAt = new Intl.DateTimeFormat("bn-BD", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(new Date(session.user.createdAt));
 
   return (
     <>
       <SiteHeader products={products} error={error} />
-      <main className="profile-page">
-        <div className="profile-heading">
-          <span aria-hidden="true" className="profile-avatar">
-            {Array.from(session.user.name || session.user.email)[0] ?? "👤"}
-          </span>
-          <div>
-            <p className="profile-eyebrow">আপনার অ্যাকাউন্ট</p>
-            <h1>আমার প্রোফাইল</h1>
-          </div>
+      <main className="min-h-[calc(100vh-150px)] bg-[#f1f6f2] px-4 pb-12 pt-20 max-[600px]:pt-12">
+        <div className="mx-auto w-full max-w-[576px]">
+          <header className="mb-5">
+            <h1 className="m-0 text-[20px] font-bold text-[#29372e]">
+              আমার প্রোফাইল
+            </h1>
+            <p className="mb-0 mt-1 text-[11px] text-[#7a847e]">
+              আপনার অ্যাকাউন্টের তথ্য এখানে দেখুন।
+            </p>
+          </header>
+          <ProfileSettings
+            email={session.user.email}
+            name={session.user.name || ""}
+          />
         </div>
-        <section aria-label="প্রোফাইলের তথ্য" className="profile-card">
-          <div className="profile-info-row">
-            <span>নাম</span>
-            <strong>{session.user.name || "নাম যোগ করা হয়নি"}</strong>
-          </div>
-          <div className="profile-info-row">
-            <span>ইমেইল</span>
-            <strong>{session.user.email}</strong>
-          </div>
-          <div className="profile-info-row">
-            <span>অ্যাকাউন্ট তৈরি</span>
-            <strong>{joinedAt}</strong>
-          </div>
-        </section>
       </main>
     </>
   );
