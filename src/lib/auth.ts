@@ -23,20 +23,7 @@ if (!authSecret) {
   throw new Error("BETTER_AUTH_SECRET must be configured to use authentication.");
 }
 
-type MongoGlobal = typeof globalThis & {
-  mongoClients?: Map<string, MongoClient>;
-};
-
-const mongoGlobal = globalThis as MongoGlobal;
-const mongoClients = mongoGlobal.mongoClients ?? new Map<string, MongoClient>();
-mongoGlobal.mongoClients = mongoClients;
-
-let client = mongoClients.get(mongoUrl);
-if (!client) {
-  client = new MongoClient(mongoUrl, { maxPoolSize: 10 });
-  mongoClients.set(mongoUrl, client);
-}
-
+const client = new MongoClient(mongoUrl, { maxPoolSize: 5 });
 const db = client.db("assignment-7");
 
 export const auth = betterAuth({
