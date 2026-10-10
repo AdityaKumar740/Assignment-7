@@ -1,11 +1,29 @@
-export const productsApiUrl =
-  "https://api.api-store.workers.dev/api/bazardor/products";
+export const bazardorApiUrl = "https://api.api-store.workers.dev/api/bazardor";
+export const productsApiUrl = `${bazardorApiUrl}/products`;
 
 export const unitNames: Record<string, string> = {
   kg: "কেজি",
   litre: "লিটার",
   dozen: "ডজন",
   piece: "পিস",
+};
+
+export const categories = [
+  { id: "chal", name: "চাল", icon: "🍚" },
+  { id: "dal", name: "ডাল", icon: "🫘" },
+  { id: "tel", name: "তেল", icon: "🛢️" },
+  { id: "sobji", name: "সবজি", icon: "🥬" },
+  { id: "mach", name: "মাছ", icon: "🐟" },
+  { id: "mangsho", name: "মাংস", icon: "🍗" },
+  { id: "dim-dui", name: "ডিম-দুধ", icon: "🥛" },
+  { id: "mosla", name: "মসলা", icon: "🌶️" },
+] as const;
+
+export type Category = {
+  id: string;
+  slug: string;
+  nameBn: string;
+  icon: string;
 };
 
 export type Product = {
@@ -23,6 +41,20 @@ export type Product = {
     pct: number;
   };
 };
+
+export function isCategory(value: unknown): value is Category {
+  if (value === null || typeof value !== "object") {
+    return false;
+  }
+
+  const category = value as Record<string, unknown>;
+  return (
+    typeof category.id === "string" &&
+    typeof category.slug === "string" &&
+    typeof category.nameBn === "string" &&
+    typeof category.icon === "string"
+  );
+}
 
 export type MarketPrice = {
   market: string;

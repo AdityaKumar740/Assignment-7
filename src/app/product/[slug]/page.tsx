@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { SiteHeader } from "@/components/site-header";
 import {
   formatBengaliNumber,
@@ -40,6 +41,12 @@ export default async function ProductDetail({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const { auth } = await import("@/lib/auth");
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    redirect(`/signin?callbackURL=${encodeURIComponent(`/product/${slug}`)}`);
+  }
+
   const listResponse = await fetch(productsApiUrl);
   if (!listResponse.ok) {
     throw new Error(`Product list request failed (${listResponse.status})`);

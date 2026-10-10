@@ -2,24 +2,17 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useToast } from "@/components/toast-provider";
+import { authClient } from "@/lib/auth-client";
 import logoIcon from "@/assets/logo-icon.png";
 import {
+  categories,
   formatBengaliNumber,
   unitNames,
   type Product,
 } from "@/lib/products";
-
-const categories = [
-  { id: "chal", name: "চাল", icon: "🍚" },
-  { id: "dal", name: "ডাল", icon: "🫘" },
-  { id: "tel", name: "তেল", icon: "🛢️" },
-  { id: "sobji", name: "সবজি", icon: "🥬" },
-  { id: "mach", name: "মাছ", icon: "🐟" },
-  { id: "mangsho", name: "মাংস", icon: "🍗" },
-  { id: "dim-dui", name: "ডিম-দুধ", icon: "🥛" },
-  { id: "mosla", name: "মসলা", icon: "🌶️" },
-];
 
 function PriceItem({ product }: { product: Product }) {
   const changeIcon =
@@ -52,8 +45,11 @@ function PriceItem({ product }: { product: Product }) {
 
 function AccountMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isSignedIn, setIsSignedIn] = useState(true);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const showToast = useToast();
+  const { data: session, isPending } = authClient.useSession();
 
   useEffect(() => {
     if (!isOpen) {
@@ -83,7 +79,16 @@ function AccountMenu() {
     };
   }, [isOpen]);
 
-  if (!isSignedIn) {
+  if (isPending) {
+    return (
+      <div
+        aria-label="অ্যাকাউন্ট লোড হচ্ছে"
+        className="account-menu-skeleton skeleton-block"
+      />
+    );
+  }
+
+  if (!session) {
     return (
       <nav className="auth-actions" aria-label="অ্যাকাউন্ট">
         <Link className="sign-in" href="/signin" prefetch={false}>
@@ -96,6 +101,9 @@ function AccountMenu() {
     );
   }
 
+  const userName = session.user.name || session.user.email;
+  const avatarInitial = Array.from(userName)[0] ?? "👤";
+
   return (
     <div className="account-menu" ref={menuRef}>
       <button
@@ -107,9 +115,9 @@ function AccountMenu() {
         type="button"
       >
         <span aria-hidden="true" className="account-avatar">
-          👤
+          {avatarInitial}
         </span>
-        <span>Rezwan</span>
+        <span>{userName}</span>
         <span aria-hidden="true" className="account-menu-caret">
           ▾
         </span>
@@ -121,8 +129,8 @@ function AccountMenu() {
           id="account-menu-panel"
         >
           <div className="account-menu-identity">
-            <strong>Rezwan Ahmed</strong>
-            <span>rezwanahmed@gmail.com</span>
+            <strong>{session.user.name || "আমার অ্যাকাউন্ট"}</strong>
+            <span>{session.user.email}</span>
           </div>
           <Link
             className="account-menu-item"
@@ -134,14 +142,35 @@ function AccountMenu() {
           </Link>
           <button
             className="account-menu-item account-menu-signout"
-            onClick={() => {
-              setIsOpen(false);
-              setIsSignedIn(false);
+            disabled={isSigningOut}
+            onClick={async () => {
+              setIsSigningOut(true);
+              try {
+                const result = await authClient.signOut();
+                if (result.error) {
+                  throw new Error(
+                    result.error.message || "সাইন আউট করা যায়নি।",
+                  );
+                }
+                setIsOpen(false);
+                showToast("সফলভাবে সাইন আউট হয়েছে।", "success");
+                router.push("/");
+                router.refresh();
+              } catch (error) {
+                showToast(
+                  error instanceof Error
+                    ? error.message
+                    : "সাইন আউট করা যায়নি। আবার চেষ্টা করুন।",
+                  "error",
+                );
+              } finally {
+                setIsSigningOut(false);
+              }
             }}
             type="button"
           >
             <span aria-hidden="true">↪</span>
-            সাইন আউট
+            {isSigningOut ? "অপেক্ষা করুন…" : "সাইন আউট"}
           </button>
         </div>
       )}
@@ -156,7 +185,7 @@ export function SiteHeader({
   products: Product[];
   error?: string | null;
 }) {
-  const [activeCategory, setActiveCategory] = useState(categories[0].id);
+  const pathname = usePathname();
   const date = new Intl.DateTimeFormat("bn-BD", {
     day: "numeric",
     month: "long",
@@ -184,16 +213,17 @@ export function SiteHeader({
       <nav className="category-nav" aria-label="পণ্যের বিভাগ">
         <div className="category-list">
           {categories.map((category) => (
-            <button
-              aria-pressed={activeCategory === category.id}
-              className={`category-link${activeCategory === category.id ? " is-active" : ""}`}
+            <Link
+              aria-current={
+                pathname === `/category/${category.id}` ? "page" : undefined
+              }
+              className={`category-link${pathname === `/category/${category.id}` ? " is-active" : ""}`}
               key={category.id}
-              onClick={() => setActiveCategory(category.id)}
-              type="button"
+              href={`/category/${category.id}`}
             >
               <span aria-hidden="true">{category.icon}</span>
               <span>{category.name}</span>
-            </button>
+            </Link>
           ))}
         </div>
       </nav>
@@ -204,7 +234,7 @@ export function SiteHeader({
       >
         {error ? (
           <p className="ticker-message" role="status">
-            দামের তথ্য লোড করা যায়নি: {error}
+            {error}
           </p>
         ) : products.length === 0 ? (
           <p className="ticker-message" role="status">
