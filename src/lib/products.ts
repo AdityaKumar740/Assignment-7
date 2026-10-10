@@ -24,6 +24,20 @@ export type Product = {
   };
 };
 
+export type MarketPrice = {
+  market: string;
+  division: string;
+  min: number;
+  max: number;
+};
+
+export type ProductDetails = Product & {
+  yesterday: number;
+  lastWeek: number;
+  lastMonth: number;
+  markets: MarketPrice[];
+};
+
 export function isProductList(value: unknown): value is Product[] {
   return (
     Array.isArray(value) &&
@@ -53,6 +67,30 @@ export function isProductList(value: unknown): value is Product[] {
         ["up", "down", "flat"].includes(String(priceChange.dir))
       );
     })
+  );
+}
+
+export function isProductDetails(value: unknown): value is ProductDetails {
+  if (value === null || typeof value !== "object") {
+    return false;
+  }
+
+  const product = value as Record<string, unknown>;
+  return (
+    isProductList([product]) &&
+    typeof product.yesterday === "number" &&
+    typeof product.lastWeek === "number" &&
+    typeof product.lastMonth === "number" &&
+    Array.isArray(product.markets) &&
+    product.markets.every(
+      (market: unknown) =>
+        market !== null &&
+        typeof market === "object" &&
+        typeof (market as Record<string, unknown>).market === "string" &&
+        typeof (market as Record<string, unknown>).division === "string" &&
+        typeof (market as Record<string, unknown>).min === "number" &&
+        typeof (market as Record<string, unknown>).max === "number",
+    )
   );
 }
 

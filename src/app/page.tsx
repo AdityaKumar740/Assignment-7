@@ -3,8 +3,8 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import logoIcon from "@/assets/logo-icon.png";
 import heroImage from "@/assets/bazar-hero.png";
+import { SiteHeader } from "@/components/site-header";
 import {
   formatBengaliNumber,
   isProductList,
@@ -12,47 +12,6 @@ import {
   unitNames,
   type Product,
 } from "@/lib/products";
-
-const categories = [
-  { id: "chal", name: "চাল", icon: "🍚" },
-  { id: "dal", name: "ডাল", icon: "🫘" },
-  { id: "tel", name: "তেল", icon: "🛢️" },
-  { id: "sobji", name: "সবজি", icon: "🥬" },
-  { id: "mach", name: "মাছ", icon: "🐟" },
-  { id: "mangsho", name: "মাংস", icon: "🍗" },
-  { id: "dim-dui", name: "ডিম-দুধ", icon: "🥛" },
-  { id: "mosla", name: "মসলা", icon: "🌶️" },
-];
-
-function PriceItem({ product }: { product: Product }) {
-  const changeIcon =
-    product.change.dir === "up"
-      ? "▲"
-      : product.change.dir === "down"
-        ? "▼"
-        : "•";
-  const changeClass =
-    product.change.dir === "up"
-      ? "price-change price-change-up"
-      : product.change.dir === "down"
-        ? "price-change price-change-down"
-        : "price-change price-change-flat";
-  const percent = formatBengaliNumber(Math.abs(product.change.pct));
-  const price = formatBengaliNumber(product.today);
-
-  return (
-    <span className="ticker-item">
-      <span aria-hidden="true">{product.categoryIcon}</span>
-      <span className="ticker-name">{product.nameBn}</span>
-      <span>
-        {price} টাকা/{unitNames[product.unit] ?? product.unit}
-      </span>
-      <span className={changeClass}>
-        {changeIcon} {percent}%
-      </span>
-    </span>
-  );
-}
 
 function ProductCard({ product }: { product: Product }) {
   const changeDirection =
@@ -68,7 +27,7 @@ function ProductCard({ product }: { product: Product }) {
     <Link
       aria-label={`${product.nameBn}, আজকের দাম ${formatBengaliNumber(product.today)} টাকা`}
       className="product-card"
-      href={`/products/${product.slug}`}
+      href={`/product/${product.slug}`}
     >
       <div className="product-card-heading">
         <span aria-hidden="true" className="product-card-image">
@@ -99,7 +58,6 @@ function ProductCard({ product }: { product: Product }) {
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [activeCategory, setActiveCategory] = useState(categories[0].id);
   const date = new Intl.DateTimeFormat("bn-BD", {
     day: "numeric",
     month: "long",
@@ -148,75 +106,7 @@ export default function Home() {
 
   return (
     <>
-      <header className="site-header">
-        <div className="header-top">
-          <Link className="brand" href="/" aria-label="বাজার দর — হোম">
-            <span className="brand-mark">
-              <Image src={logoIcon} alt="" width={28} height={28} priority />
-            </span>
-            <span className="brand-copy">
-              <span className="brand-name">বাজার দর</span>
-              <span className="brand-date" suppressHydrationWarning>
-                {date}
-              </span>
-            </span>
-          </Link>
-
-          <nav className="auth-actions" aria-label="অ্যাকাউন্ট">
-            <Link className="sign-in" href="/signin" prefetch={false}>
-              সাইন ইন
-            </Link>
-            <Link className="sign-up" href="/signup" prefetch={false}>
-              সাইন আপ
-            </Link>
-          </nav>
-        </div>
-
-        <nav className="category-nav" aria-label="পণ্যের বিভাগ">
-          <div className="category-list">
-            {categories.map((category) => (
-              <button
-                aria-pressed={activeCategory === category.id}
-                className={`category-link${activeCategory === category.id ? " is-active" : ""}`}
-                key={category.id}
-                onClick={() => setActiveCategory(category.id)}
-                type="button"
-              >
-                <span aria-hidden="true">{category.icon}</span>
-                <span>{category.name}</span>
-              </button>
-            ))}
-          </div>
-        </nav>
-
-        <section
-          aria-label="বাজারের পণ্যের বর্তমান দাম"
-          className="price-ticker"
-        >
-          {error ? (
-            <p className="ticker-message" role="status">
-              দামের তথ্য লোড করা যায়নি: {error}
-            </p>
-          ) : products.length === 0 ? (
-            <p className="ticker-message" role="status">
-              দামের তথ্য লোড হচ্ছে…
-            </p>
-          ) : (
-            <div className="ticker-track">
-              <div className="ticker-group">
-                {products.map((product) => (
-                  <PriceItem key={product.id} product={product} />
-                ))}
-              </div>
-              <div aria-hidden="true" className="ticker-group">
-                {products.map((product) => (
-                  <PriceItem key={product.id} product={product} />
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
-      </header>
+      <SiteHeader error={error} products={products} />
 
       <main>
         <section aria-labelledby="hero-title" className="hero-banner">
