@@ -65,7 +65,7 @@ export default function Home() {
       <SiteHeader error={error} products={products} />
 
       <main>
-        <section aria-labelledby="hero-title" className="mx-auto my-3 grid min-h-[220px] w-[min(100%-24px,1080px)] grid-cols-[minmax(0,1fr)_minmax(100px,0.55fr)] items-center gap-2 overflow-hidden rounded-[19px] bg-[#f0f7f0] px-4 py-5 max-[400px]:grid-cols-[minmax(0,1fr)_80px] max-[400px]:px-3 sm:my-5 sm:min-h-[350px] sm:w-[min(100%-40px,1080px)] sm:grid-cols-[1.2fr_0.8fr] sm:gap-5 sm:rounded-[28px] sm:px-12 sm:py-7">
+        <section aria-labelledby="hero-title" className="mx-auto my-3 grid min-h-[220px] w-[min(100%-24px,1152px)] grid-cols-1 items-center gap-1 overflow-hidden rounded-[19px] bg-[#f0f7f0] px-4 py-5 max-[400px]:px-3 sm:my-5 sm:min-h-[350px] sm:w-[min(100%-40px,1152px)] sm:grid-cols-[1.2fr_0.8fr] sm:gap-5 sm:rounded-[28px] sm:px-12 sm:py-7">
           <div className="relative z-10">
             <p className="mb-3 inline-flex rounded-full bg-white px-3 py-1.5 text-[11px] font-semibold text-[#13813f] shadow-sm">
               {date}
@@ -81,13 +81,13 @@ export default function Home() {
               সব পণ্যের দাম দেখুন
             </a>
           </div>
-          <div className="relative flex h-full min-h-[210px] items-center justify-center">
+          <div className="relative flex min-h-[110px] items-center justify-center sm:h-full sm:min-h-[210px]">
             <Image
               src={heroImage}
               alt="তাজা সবজিতে ভরা বাজারের ঝুড়ি"
               priority
               sizes="(max-width: 700px) 80vw, 360px"
-              className="h-auto max-h-[290px] w-full max-w-[360px] object-contain"
+              className="h-auto max-h-[150px] w-full max-w-[220px] object-contain sm:max-h-[290px] sm:max-w-[360px]"
             />
           </div>
         </section>
