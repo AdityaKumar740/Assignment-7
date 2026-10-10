@@ -10,18 +10,14 @@ import {
   unitNames,
 } from "@/lib/products";
 
+export const dynamicParams = true;
+
 export default async function ProductDetail({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const { auth } = await import("@/lib/auth");
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    redirect(`/signin?callbackURL=${encodeURIComponent(`/product/${slug}`)}`);
-  }
-
   const listResponse = await fetch(productsApiUrl);
   if (!listResponse.ok) {
     throw new Error(`Product list request failed (${listResponse.status})`);
@@ -35,6 +31,13 @@ export default async function ProductDetail({
   const productSummary = listData.find((item) => item.slug === slug);
   if (!productSummary) {
     notFound();
+  }
+
+  const { auth } = await import("@/lib/auth");
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    const callbackURL = encodeURIComponent(`/product/${slug}`);
+    redirect(`/signin?callbackURL=${callbackURL}&notice=protected-route`);
   }
 
   const detailResponse = await fetch(

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { CategoryProductList } from "@/components/category-product-list";
 import {
@@ -8,20 +8,7 @@ import {
   productsApiUrl,
 } from "@/lib/products";
 
-function CategoryNotFound() {
-  return (
-    <section className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-[#e5ebe6] bg-[#f7faf7] px-5 py-8 text-center">
-      <span aria-hidden="true" className="grid h-14 w-14 place-items-center rounded-2xl bg-[#e9f2ea] text-[26px]">
-        🔎
-      </span>
-      <h1 className="mb-0 mt-4 text-[22px] font-bold text-[#26332b]">এই বিভাগটি পাওয়া যায়নি</h1>
-      <p className="mb-4 mt-2 text-[13px] text-[#69756d]">সঠিক বিভাগ নির্বাচন করে আবার চেষ্টা করুন।</p>
-      <Link className="inline-flex min-h-10 items-center justify-center rounded-lg bg-[#078641] px-4 py-2 text-[13px] font-bold text-white hover:bg-[#066f36]" href="/">
-        হোম পেজে ফিরে যান
-      </Link>
-    </section>
-  );
-}
+export const dynamicParams = true;
 
 export default async function CategoryPage({
   params,
@@ -39,12 +26,7 @@ export default async function CategoryPage({
   ]);
 
   if (categoryResponse.status === 404) {
-    return (
-      <>
-        <SiteHeader products={[]} />
-        <CategoryNotFound />
-      </>
-    );
+    notFound();
   }
   if (!categoryResponse.ok) {
     throw new Error(`Category request failed (${categoryResponse.status})`);
@@ -88,7 +70,7 @@ export default async function CategoryPage({
           </div>
         </header>
         {products.length === 0 ? (
-          <CategoryNotFound />
+          notFound()
         ) : (
           <CategoryProductList products={products} />
         )}

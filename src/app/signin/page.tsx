@@ -7,7 +7,11 @@ import { getProductsForHeader } from "@/lib/server-products";
 export const dynamic = "force-dynamic";
 
 type SignInPageProps = {
-  searchParams: Promise<{ callbackURL?: string; registered?: string }>;
+  searchParams: Promise<{
+    callbackURL?: string;
+    registered?: string;
+    notice?: string;
+  }>;
 };
 
 function getSafeCallbackURL(callbackURL?: string) {
@@ -28,7 +32,7 @@ function getSafeCallbackURL(callbackURL?: string) {
 }
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const [{ callbackURL, registered }, { products, error }] = await Promise.all([
+  const [{ callbackURL, registered, notice }, { products, error }] = await Promise.all([
     searchParams,
     getProductsForHeader(),
   ]);
@@ -42,6 +46,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
           githubEnabled={githubOAuthEnabled}
           googleEnabled={googleOAuthEnabled}
           mode="signin"
+          protectedRouteNotice={notice === "protected-route"}
           registered={registered === "1"}
         />
       </Suspense>

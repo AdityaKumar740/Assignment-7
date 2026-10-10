@@ -38,12 +38,14 @@ export function AuthForm({
   googleEnabled,
   githubEnabled,
   registered = false,
+  protectedRouteNotice = false,
 }: {
   mode: AuthMode;
   callbackURL?: string;
   googleEnabled: boolean;
   githubEnabled: boolean;
   registered?: boolean;
+  protectedRouteNotice?: boolean;
 }) {
   const router = useRouter();
   const showToast = useToast();
@@ -65,6 +67,12 @@ export function AuthForm({
       showToast("অ্যাকাউন্ট তৈরি হয়েছে। এখন সাইন ইন করুন।", "success");
     }
   }, [registered, showToast]);
+
+  useEffect(() => {
+    if (protectedRouteNotice) {
+      showToast("এই পৃষ্ঠাটি দেখতে আগে সাইন ইন করুন।", "error");
+    }
+  }, [protectedRouteNotice, showToast]);
 
   if (isPending || session) {
     return <AuthPageSkeleton mode={mode} />;

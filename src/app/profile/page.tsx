@@ -10,7 +10,7 @@ export default async function ProfilePage() {
   const { auth } = await import("@/lib/auth");
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
-    redirect("/signin?callbackURL=%2Fprofile");
+    redirect("/signin?callbackURL=%2Fprofile&notice=protected-route");
   }
 
   const { products, error } = await getProductsForHeader();

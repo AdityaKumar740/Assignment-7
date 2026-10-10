@@ -14,6 +14,7 @@ import {
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const date = new Intl.DateTimeFormat("bn-BD", {
     day: "numeric",
     month: "long",
@@ -41,6 +42,7 @@ export default function Home() {
 
         setProducts(data);
         setError(null);
+        setIsLoading(false);
       } catch (fetchError) {
         if (
           fetchError instanceof DOMException &&
@@ -53,6 +55,7 @@ export default function Home() {
             ? fetchError.message
             : "দামের তথ্য লোড করা যায়নি।",
         );
+        setIsLoading(false);
       }
     }
 
@@ -100,9 +103,35 @@ export default function Home() {
             <p className="rounded-xl border border-[#f0c4bf] bg-[#fff5f4] p-4 text-sm text-[#a22d25]" role="alert">
               পণ্যের তথ্য দেখানো যাচ্ছে না: {error}
             </p>
+          ) : isLoading ? (
+            <div aria-busy="true" aria-label="পণ্যের তথ্য লোড হচ্ছে" role="status">
+              <p className="rounded-xl bg-[#f7faf7] p-4 text-sm text-[#59635d]">
+                পণ্যের তথ্য লোড হচ্ছে…
+              </p>
+              <div aria-hidden="true" className="mt-3 grid grid-cols-2 gap-2 max-[400px]:grid-cols-1 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4">
+                {Array.from({ length: 8 }, (_, index) => (
+                  <div
+                    className="flex min-h-[108px] flex-col justify-between gap-3 rounded-xl border border-[#e5ebe6] bg-white p-3.5"
+                    key={index}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="skeleton-block h-10 w-10 rounded-[10px]" />
+                      <span className="grid flex-1 gap-2">
+                        <span className="skeleton-block h-3 w-4/5 rounded" />
+                        <span className="skeleton-block h-2.5 w-2/5 rounded" />
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="skeleton-block h-3 w-1/3 rounded" />
+                      <span className="skeleton-block h-5 w-12 rounded-md" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : products.length === 0 ? (
             <p className="rounded-xl bg-[#f7faf7] p-4 text-sm text-[#59635d]" role="status">
-              পণ্যের তথ্য লোড হচ্ছে…
+              কোনো পণ্য পাওয়া যায়নি।
             </p>
           ) : (
             <>

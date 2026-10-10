@@ -46,7 +46,21 @@ export const auth = betterAuth({
     requireEmailVerification: false,
   },
   socialProviders: {
-    ...(googleCredentials ? { google: googleCredentials } : {}),
-    ...(githubCredentials ? { github: githubCredentials } : {}),
+    ...(googleCredentials
+      ? {
+          google: {
+            clientId: googleCredentials.clientId,
+            clientSecret: googleCredentials.clientSecret,
+          },
+        }
+      : {}),
+    ...(githubCredentials
+      ? {
+          github: {
+            clientId: githubCredentials.clientId,
+            clientSecret: githubCredentials.clientSecret,
+          },
+        }
+      : {}),
   },
 });

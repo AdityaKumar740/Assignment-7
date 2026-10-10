@@ -57,7 +57,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="pointer-events-none fixed right-[18px] top-[18px] z-[100] grid w-[min(390px,calc(100vw-36px))] gap-2 max-[600px]:right-2.5 max-[600px]:top-2.5 max-[600px]:w-[calc(100vw-20px)]" aria-live="polite" aria-atomic="true">
+      <div data-rht-toaster="" className="pointer-events-none fixed right-[18px] top-[18px] z-[100] grid w-[min(390px,calc(100vw-36px))] gap-2 max-[600px]:right-2.5 max-[600px]:top-2.5 max-[600px]:w-[calc(100vw-20px)]" aria-live="polite" aria-atomic="true">
         {toast && (
           <div
             className={`pointer-events-auto flex items-start gap-2.5 rounded-[10px] border bg-white px-4 py-3 text-[13px] leading-relaxed shadow-[0_9px_28px_rgb(26_42_31_/_16%)] ${toast.variant === "success" ? "border-[#b9dfc6] text-[#176d37]" : "border-[#f0c4bf] text-[#a22d25]"}`}
